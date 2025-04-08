@@ -26,7 +26,7 @@ Don't forget to load necessary modules. For SCOREC Machines, you can use the fol
 4. To run tests, use `ctest` or `make test` after building the project. **Note that some tests may not work if the test binaries are run directly from the build directory. Use `tests/` directory in that case.**
 
 
-## Developers Guide
+## Developer's Guide
 We are using `clang-format` to enforce a consistent coding style.
 Here we are using the `Google` style. To format code, run:
 ```bash
