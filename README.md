@@ -14,7 +14,8 @@ cmake -S . -B build \
 
 cmake --build build -j2 --target install
 ```
-Don't forget to load necessary modules. For SCOREC Machines, you can use the following command:
+> [!TIP]
+> Don't forget to load necessary modules for compilers. On SCOREC Machines, you can use the following command:
 ```bash
    module use /opt/scorec/spack/rhel9/v0201_4/lmod/linux-rhel9-x86_64/Core/
    module load gcc/12.3.0-iil3lno mpich/4.1.1-xpoyz4t cuda/12.1.1-zxa4msk
@@ -27,6 +28,9 @@ Don't forget to load necessary modules. For SCOREC Machines, you can use the fol
 
 
 ## Developer's Guide
+> [!CAUTION]
+> Please fork this repository and add all changes through pull requests (not directly pushing to the `main` branch).
+### `clang-format`
 We are using `clang-format` to enforce a consistent coding style.
 Here we are using the `Google` style. To format code, run:
 ```bash
