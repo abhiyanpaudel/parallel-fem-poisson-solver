@@ -22,6 +22,6 @@ include(Catch)
 
 # Unit tests
 add_executable(unit_tests unit_tests.cpp ${CMAKE_SOURCE_DIR}/src/Mesh.cpp)
-target_link_libraries(unit_tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(unit_tests PRIVATE Catch2::Catch2WithMain Kokkos::kokkos)
 target_include_directories(unit_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
 catch_discover_tests(unit_tests WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
