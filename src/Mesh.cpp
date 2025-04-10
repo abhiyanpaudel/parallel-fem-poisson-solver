@@ -133,4 +133,10 @@ Mesh::Mesh(const std::string filename)
             data_(i,j,2) = y_coords[element_nodes[i*meshType_+j]];
         }
     }
+
+    // Copy the data over to the GPU
+    #ifdef KOKKOS_ENABLE_CUDA
+        Kokkos::resize(device_data_, static_cast<int>(numElements_), static_cast<int>(meshType_), 3);
+        Kokkos::deep_copy(device_data_, data_);
+    #endif
 }
