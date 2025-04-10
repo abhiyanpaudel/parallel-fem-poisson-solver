@@ -122,21 +122,20 @@ Mesh::Mesh(const std::string filename)
     {
         throw std::runtime_error("Cannot open file: " + filename);
     }
-    // Resize view and populate with data from the file
+    
+    // Resize view and create mirror in host space
     Kokkos::resize(data_, static_cast<int>(numElements_), static_cast<int>(meshType_), 3);
+    auto host_data_ = Kokkos::create_mirror_view(data_);
+
+    // Fill in data and copy back to device
     for (int i=0; i<numElements_; i++) 
     {
         for (int j=0; j<meshType_; j++)
         {
-            data_(i,j,0) = element_nodes[i*meshType_+j]; 
-            data_(i,j,1) = x_coords[element_nodes[i*meshType_+j]];
-            data_(i,j,2) = y_coords[element_nodes[i*meshType_+j]];
+            host_data_(i,j,0) = element_nodes[i*meshType_+j]; 
+            host_data_(i,j,1) = x_coords[element_nodes[i*meshType_+j]];
+            host_data_(i,j,2) = y_coords[element_nodes[i*meshType_+j]];
         }
     }
-
-    // Copy the data over to the GPU
-    #ifdef KOKKOS_ENABLE_CUDA
-        Kokkos::resize(device_data_, static_cast<int>(numElements_), static_cast<int>(meshType_), 3);
-        Kokkos::deep_copy(device_data_, data_);
-    #endif
+    Kokkos::deep_copy(data_, host_data_);
 }
