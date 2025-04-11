@@ -1,5 +1,5 @@
 cmake -B build -S . \
-  -DCMAKE_BUILD_TYPE=Build \
+  -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_INSTALL_PREFIX=build/install \
   -DCMAKE_CXX_COMPILER=`which mpicxx` \
   -DCMAKE_C_COMPILER=`which mpicc` \
