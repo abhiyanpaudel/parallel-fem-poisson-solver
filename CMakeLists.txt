@@ -6,6 +6,8 @@ include(GNUInstallDirs)
 ################## OPTIONS ##################
 option(Assignment_ENABLE_TESTING        "Enable testing"        ON)
 
+#################### Dependencies ####################
+find_package(Kokkos REQUIRED)
 
 ################## Add Tests ##################
 if(Assignment_ENABLE_TESTING)
@@ -14,10 +16,6 @@ if(Assignment_ENABLE_TESTING)
     enable_testing()
     add_subdirectory(tests)
 endif()
-
-
-#################### Dependencies ####################
-find_package(Kokkos REQUIRED)
 
 ####################### Source Subdirectory ######################
 add_subdirectory(src)
