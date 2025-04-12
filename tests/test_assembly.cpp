@@ -71,6 +71,28 @@ TEST_CASE("Test StiffnessMatrix Construction") {
       REQUIRE(rowColIndex_host(i).c == expected_ooc[i]);
       REQUIRE(elem_stiffness_data_host(i) == expected_data[i]);
     }
+
+    printf("\n");
+    printf("=>=============== Test Assembly ===============<=\n");
+    printf("\n");
+
+    stiffnessMatrix.assemble(elem_stiffness_data);
+    auto row_id = stiffnessMatrix.GetRowIndex();
+    auto row_id_host = Kokkos::create_mirror_view(row_id);
+    Kokkos::deep_copy(row_id_host, row_id);
+
+    REQUIRE(row_id_host.size() == stiffnessMatrix.GetDim() + 1);
+
+    printf("CSR Row Index:\n");
+    for (auto i = 0; i < row_id_host.size(); i++) {
+      printf("%d ", row_id_host(i));
+    }
+    printf("\n");
+
+    std::vector<int> expected_row_id = {0, 6, 12, 18, 24, 36};
+    for (auto i = 0; i < row_id_host.size(); i++) {
+      REQUIRE(row_id_host(i) == expected_row_id[i]);
+    }
   }
   Kokkos::finalize();
 }

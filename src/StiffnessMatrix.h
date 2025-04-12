@@ -36,6 +36,8 @@ class StiffnessMatrix {
     elementStiffnessMatrix.sortDataByRowCol(data);
   }
 
+  void assemble(Kokkos::View<double*> data);
+
  private:
   // ********************** Private Functions **********************
   void createRowIndex();

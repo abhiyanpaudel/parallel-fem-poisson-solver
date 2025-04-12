@@ -77,3 +77,24 @@ void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
   Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
                                     rowColIndex_, data, gIDComparator());
 }
+
+void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
+  auto row_index_l = rowIndex_;  // TODO: Use scatter view
+  auto rowcolIndex_l = elementStiffnessMatrix.rowColIndex_;
+
+  Kokkos::parallel_for(
+      "create row index", rowcolIndex_l.size(), KOKKOS_LAMBDA(const int i) {
+        int row = rowcolIndex_l(i).r;
+        Kokkos::atomic_inc(&row_index_l(row + 1));
+      });
+  Kokkos::fence();
+
+  Kokkos::parallel_scan(
+      "create row index scan", rowcolIndex_l.size(),
+      KOKKOS_LAMBDA(const int i, int &partial_sum, const bool final) {
+        partial_sum += row_index_l(i);
+        if (final) {
+          row_index_l(i) = partial_sum;
+        }
+      });
+}
