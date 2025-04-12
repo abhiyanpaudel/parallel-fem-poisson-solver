@@ -5,6 +5,7 @@
 #include "StiffnessMatrix.h"
 
 #include <Kokkos_ScatterView.hpp>
+#include <Kokkos_Sort.hpp>
 
 StiffnessMatrix::StiffnessMatrix(Mesh mesh) : mesh_(mesh) {
   nDof_ = mesh_.GetNumVertices();
@@ -40,10 +41,8 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
 
   int size_of_local_stiffness = n_local_verts * n_local_verts;
 
-  Kokkos::resize(ooc_, n_elems * size_of_local_stiffness);
-  Kokkos::resize(oor_, n_elems * size_of_local_stiffness);
-  auto oor_l = oor_;
-  auto ooc_l = ooc_;
+  Kokkos::resize(rowColIndex_, n_elems * size_of_local_stiffness);
+  auto rowColIndex_l = rowColIndex_;
 
   // TODO : Use MDRange for better performance as it's a nested loop
   Kokkos::parallel_for(
@@ -54,9 +53,27 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
             int node_id_j = mesh_data(elem_id, col, 0);
             int data_id =
                 elem_id * size_of_local_stiffness + row * n_local_verts + col;
-            oor_l(data_id) = node_id_i;
-            ooc_l(data_id) = node_id_j;
+            rowColIndex_l(data_id).r = node_id_i;
+            rowColIndex_l(data_id).c = node_id_j;
           }
         }
       });
+}
+
+void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
+  assert(rowColIndex_.size() == data.size());
+  auto rowColIndex_l = rowColIndex_;
+
+  struct gIDComparator {
+    KOKKOS_INLINE_FUNCTION constexpr bool operator()(
+        const globalIndex &a, const globalIndex &b) const {
+      if (a.r == b.r) {
+        return a.c < b.c;
+      }
+      return a.r < b.r;
+    };
+  };
+
+  Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
+                                    rowColIndex_, data, gIDComparator());
 }

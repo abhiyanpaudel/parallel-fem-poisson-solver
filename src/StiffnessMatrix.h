@@ -8,14 +8,17 @@
 #include <Kokkos_Core.hpp>
 
 #include "Mesh.h"
+struct globalIndex {
+  int r;
+  int c;
+};
 
 class ElementStiffnessMatrix {
  public:
   void createOOROOC(Mesh mesh);
+  void sortDataByRowCol(Kokkos::View<double*> data);
 
-  Kokkos::View<int*> oor_;
-  Kokkos::View<int*> ooc_;
-  Kokkos::View<double*> data_;
+  Kokkos::View<globalIndex*> rowColIndex_;
 };
 
 class StiffnessMatrix {
@@ -28,6 +31,10 @@ class StiffnessMatrix {
     return rowIndex_;
   };
   size_t GetDim() const { return nDof_; };
+
+  void sortDataByRowCol(Kokkos::View<double*> data) {
+    elementStiffnessMatrix.sortDataByRowCol(data);
+  }
 
  private:
   // ********************** Private Functions **********************
