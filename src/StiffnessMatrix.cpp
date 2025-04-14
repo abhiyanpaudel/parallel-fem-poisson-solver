@@ -10,7 +10,7 @@
 StiffnessMatrix::StiffnessMatrix(Mesh mesh) : mesh_(mesh) {
   nDof_ = mesh_.GetNumVertices();
   nElem_ = mesh_.GetNumElements();
-  Kokkos::resize(rowIndex_, nDof_ + 1);
+  Kokkos::resize(csrRowIds_, nDof_ + 1);
   // createRowIndex();
   elementStiffnessMatrix.createOOROOC(mesh_);
 }
@@ -19,8 +19,8 @@ void StiffnessMatrix::createRowIndex() {
   auto mesh_data = mesh_.GetData();
   int n_local_verts = mesh_.GetMeshType() + 1;
   // auto rowIndex_scatter =
-  // Kokkos::Experimental::create_scatter_view(rowIndex_);
-  auto rowIndex_l = rowIndex_;
+  // Kokkos::Experimental::create_scatter_view(csrRowIds_);
+  auto rowIndex_l = csrRowIds_;
 
   /* ! Wrong
   // TODO: MDRange/ Hierarchical
@@ -41,8 +41,8 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
 
   int size_of_local_stiffness = n_local_verts * n_local_verts;
 
-  Kokkos::resize(rowColIndex_, n_elems * size_of_local_stiffness);
-  auto rowColIndex_l = rowColIndex_;
+  Kokkos::resize(rowColCOO_, n_elems * size_of_local_stiffness);
+  auto rowColIndex_l = rowColCOO_;
 
   // TODO : Use MDRange for better performance as it's a nested loop
   Kokkos::parallel_for(
@@ -61,8 +61,8 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
 }
 
 void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
-  assert(rowColIndex_.size() == data.size());
-  auto rowColIndex_l = rowColIndex_;
+  assert(rowColCOO_.size() == data.size());
+  auto rowColCoo_l = rowColCOO_;
 
   struct gIDComparator {
     KOKKOS_INLINE_FUNCTION constexpr bool operator()(
@@ -75,26 +75,96 @@ void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
   };
 
   Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
-                                    rowColIndex_, data, gIDComparator());
+                                    rowColCoo_l, data, gIDComparator());
 }
 
 void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
-  auto row_index_l = rowIndex_;  // TODO: Use scatter view
-  auto rowcolIndex_l = elementStiffnessMatrix.rowColIndex_;
+  auto rowColCOO_l = elementStiffnessMatrix.rowColCOO_;
+  size_t coo_size = rowColCOO_l.size();
 
+  // * Find unique row/col indices
+  auto unique_pos_flag = Kokkos::View<int *>("uniqueFlag", coo_size);
+  auto unique_row_start_index = Kokkos::View<size_t *>("uniquestartidx", nDof_);
   Kokkos::parallel_for(
-      "create row index", rowcolIndex_l.size(), KOKKOS_LAMBDA(const int i) {
-        int row = rowcolIndex_l(i).r;
-        Kokkos::atomic_inc(&row_index_l(row + 1));
+      "MarkUnique", coo_size, KOKKOS_LAMBDA(const size_t i) {
+        int row_flip_flag =
+            (i == 0 || (rowColCOO_l(i).r != rowColCOO_l(i - 1).r));
+        int col_flip_flag = (rowColCOO_l(i).c != rowColCOO_l(i - 1).c);
+        unique_pos_flag(i) = row_flip_flag || col_flip_flag;
+        if (row_flip_flag) {
+          unique_row_start_index(rowColCOO_l(i).r) = i;
+        }
+      });
+
+  // * Create CSR row index
+  auto csrRowIds_l = csrRowIds_;  // TODO: Use scatter view
+  assert(csrRowIds_l.size() == nDof_ + 1);
+  Kokkos::parallel_for(
+      "create row index", coo_size, KOKKOS_LAMBDA(const int i) {
+        if (unique_pos_flag(i) == 1) {
+          int row = rowColCOO_l(i).r;
+          Kokkos::atomic_inc(&csrRowIds_l(row + 1));
+        }
       });
   Kokkos::fence();
 
   Kokkos::parallel_scan(
-      "create row index scan", rowcolIndex_l.size(),
-      KOKKOS_LAMBDA(const int i, int &partial_sum, const bool final) {
-        partial_sum += row_index_l(i);
+      "create row index scan", csrRowIds_l.size(),
+      KOKKOS_LAMBDA(const size_t i, size_t &partial_sum, const bool final) {
+        partial_sum += csrRowIds_l(i);
         if (final) {
-          row_index_l(i) = partial_sum;
+          csrRowIds_l(i) = partial_sum;
+        }
+      },
+      csrDataSize_);
+  Kokkos::fence();
+  printf("Total unique entries: %zu\n", csrDataSize_);
+
+  Kokkos::resize(csrColIds_, csrDataSize_);
+  Kokkos::resize(csrValues_, csrDataSize_);
+  auto csrColIds_l = csrColIds_;
+  auto csrValues_l = csrValues_;
+
+  // * Fill CSR row index
+  // TODO: Multilevel parallelism
+  Kokkos::parallel_for(
+      "fill CSR", nDof_, KOKKOS_LAMBDA(const size_t row) {
+        size_t row_start = unique_row_start_index(row);
+        size_t row_end =
+            (row == nDof_ - 1) ? coo_size : unique_row_start_index(row + 1);
+        printf("Row %zu: %zu %zu\n", row, row_start, row_end);
+        assert(row_end > row_start);
+
+        int col_i = -1;
+        for (size_t coo_i = row_start; coo_i < row_end; ++coo_i) {
+          col_i += unique_pos_flag(coo_i);
+          size_t csr_data_index = csrRowIds_l(row) + col_i;
+          csrColIds_l(csr_data_index) = rowColCOO_l(coo_i).c;
+          csrValues_l(csr_data_index) += data(coo_i);
         }
       });
+}
+
+void StiffnessMatrix::printStiffnessMatrix() const {
+  auto csr_row_host = Kokkos::create_mirror_view(csrRowIds_);
+  auto csr_col_host = Kokkos::create_mirror_view(csrColIds_);
+  auto csr_val_host = Kokkos::create_mirror_view(csrValues_);
+
+  Kokkos::deep_copy(csr_row_host, csrRowIds_);
+  Kokkos::deep_copy(csr_col_host, csrColIds_);
+  Kokkos::deep_copy(csr_val_host, csrValues_);
+
+  printf("Row Index:\n");
+  for (int i = 0; i < csr_row_host.size(); ++i) {
+    printf("%d ", csr_row_host(i));
+  }
+  printf("\nColumn Index:\n");
+  for (int i = 0; i < csr_col_host.size(); ++i) {
+    printf("%d ", csr_col_host(i));
+  }
+  printf("\nValues:\n");
+  for (int i = 0; i < csr_val_host.size(); ++i) {
+    printf("%.1f ", csr_val_host(i));
+  }
+  printf("\n");
 }

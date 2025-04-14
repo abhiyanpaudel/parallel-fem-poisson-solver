@@ -27,9 +27,9 @@ TEST_CASE("Test StiffnessMatrix Construction") {
     StiffnessMatrix stiffnessMatrix(mesh);
 
     auto rowColIndex_host = Kokkos::create_mirror_view(
-        stiffnessMatrix.elementStiffnessMatrix.rowColIndex_);
+        stiffnessMatrix.elementStiffnessMatrix.rowColCOO_);
     Kokkos::deep_copy(rowColIndex_host,
-                      stiffnessMatrix.elementStiffnessMatrix.rowColIndex_);
+                      stiffnessMatrix.elementStiffnessMatrix.rowColCOO_);
 
     REQUIRE(rowColIndex_host.size() == expected_size);
 
@@ -49,7 +49,7 @@ TEST_CASE("Test StiffnessMatrix Construction") {
 
     stiffnessMatrix.sortDataByRowCol(elem_stiffness_data);
     Kokkos::deep_copy(rowColIndex_host,
-                      stiffnessMatrix.elementStiffnessMatrix.rowColIndex_);
+                      stiffnessMatrix.elementStiffnessMatrix.rowColCOO_);
     auto elem_stiffness_data_host =
         Kokkos::create_mirror_view(elem_stiffness_data);
     Kokkos::deep_copy(elem_stiffness_data_host, elem_stiffness_data);
@@ -89,9 +89,33 @@ TEST_CASE("Test StiffnessMatrix Construction") {
     }
     printf("\n");
 
-    std::vector<int> expected_row_id = {0, 6, 12, 18, 24, 36};
+    std::vector<int> expected_row_id = {0, 4, 8, 12, 16, 21};
     for (auto i = 0; i < row_id_host.size(); i++) {
       REQUIRE(row_id_host(i) == expected_row_id[i]);
+    }
+
+    printf("=>========== Stiffness Matrix ===========<=\n");
+    stiffnessMatrix.printStiffnessMatrix();
+
+    auto col_id = stiffnessMatrix.GetColIndex();
+    auto col_id_host = Kokkos::create_mirror_view(col_id);
+    Kokkos::deep_copy(col_id_host, col_id);
+    REQUIRE(col_id_host.size() == 21);
+    std::vector<int> expected_col_ids = {0, 1, 3, 4, 0, 1, 2, 4, 1, 2, 3,
+                                         4, 0, 2, 3, 4, 0, 1, 2, 3, 4};
+    for (auto i = 0; i < col_id_host.size(); i++) {
+      REQUIRE(col_id_host(i) == expected_col_ids[i]);
+    }
+
+    auto assembled_data = stiffnessMatrix.GetValues();
+    auto assembled_data_host = Kokkos::create_mirror_view(assembled_data);
+    Kokkos::deep_copy(assembled_data_host, assembled_data);
+    REQUIRE(assembled_data_host.size() == 21);
+    std::vector<int> expected_assembled_data = {17, 6,  11, 17, 2,  26, 24,
+                                                26, 20, 53, 33, 53, 15, 29,
+                                                44, 44, 17, 26, 53, 44, 70};
+    for (auto i = 0; i < assembled_data_host.size(); i++) {
+      REQUIRE(assembled_data_host(i) == int(expected_assembled_data[i]));
     }
   }
   Kokkos::finalize();

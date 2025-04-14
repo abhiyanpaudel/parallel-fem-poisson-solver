@@ -8,6 +8,7 @@
 #include <Kokkos_Core.hpp>
 
 #include "Mesh.h"
+
 struct globalIndex {
   int r;
   int c;
@@ -16,31 +17,47 @@ struct globalIndex {
 class ElementStiffnessMatrix {
  public:
   void createOOROOC(Mesh mesh);
-  void sortDataByRowCol(Kokkos::View<double*> data);
 
-  Kokkos::View<globalIndex*> rowColIndex_;
+  void sortDataByRowCol(Kokkos::View<double *> data);
+
+  Kokkos::View<globalIndex *> rowColCOO_;
 };
 
 class StiffnessMatrix {
  public:
   StiffnessMatrix(Mesh mesh);
+
   ElementStiffnessMatrix elementStiffnessMatrix;
 
   [[nodiscard]]
-  Kokkos::View<int*> GetRowIndex() const {
-    return rowIndex_;
+  Kokkos::View<int *> GetRowIndex() const {
+    return csrRowIds_;
   };
+
+  [[nodiscard]]
+  Kokkos::View<int *> GetColIndex() const {
+    return csrColIds_;
+  };
+
+  [[nodiscard]]
+  Kokkos::View<double *> GetValues() const {
+    return csrValues_;
+  };
+
   size_t GetDim() const { return nDof_; };
 
-  void sortDataByRowCol(Kokkos::View<double*> data) {
+  void sortDataByRowCol(Kokkos::View<double *> data) {
     elementStiffnessMatrix.sortDataByRowCol(data);
   }
 
-  void assemble(Kokkos::View<double*> data);
+  void assemble(Kokkos::View<double *> data);
+
+  void printStiffnessMatrix() const;
 
  private:
   // ********************** Private Functions **********************
   void createRowIndex();
+
   void createColIndex();
 
   // ********************** Private Variables **********************
@@ -49,10 +66,11 @@ class StiffnessMatrix {
 
   Mesh mesh_;
 
-  // ********************** Data Views **********************
-  Kokkos::View<double*> MData_;
-  Kokkos::View<int*> rowIndex_;
-  Kokkos::View<int*> colIndex_;
+  // ********************** CSR Data Views **********************
+  size_t csrDataSize_ = 0;
+  Kokkos::View<double *> csrValues_;
+  Kokkos::View<int *> csrRowIds_;
+  Kokkos::View<int *> csrColIds_;
 };
 
 #endif  // ASSIGNMENT2_STIFFNESSMATRIX_H
