@@ -14,6 +14,16 @@ struct globalIndex {
   int c;
 };
 
+struct gIDComparator {
+  KOKKOS_FUNCTION constexpr bool operator()(const globalIndex &a,
+                                            const globalIndex &b) const {
+    if (a.r == b.r) {
+      return a.c < b.c;
+    }
+    return a.r < b.r;
+  };
+};
+
 class ElementStiffnessMatrix {
  public:
   void createOOROOC(Mesh mesh);

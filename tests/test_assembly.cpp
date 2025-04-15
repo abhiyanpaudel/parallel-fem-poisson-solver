@@ -4,6 +4,11 @@
 
 #include <StiffnessMatrix.h>
 
+bool matches_any(const std::vector<int>& vec, int value) {
+  return std::any_of(vec.begin(), vec.end(),
+                     [value](const int& v) { return v == value; });
+}
+
 #include <catch2/catch_test_macros.hpp>
 #include <vector>
 
@@ -61,6 +66,45 @@ TEST_CASE("Test StiffnessMatrix Construction") {
     std::vector<int> expected_data = {
         8,  9,  6,  11, 7,  10, 2, 0,  26, 24, 1,  25, 20, 35, 18, 33, 34, 19,
         15, 29, 17, 27, 16, 28, 5, 12, 23, 3,  21, 32, 30, 14, 4,  22, 31, 13};
+    std::vector<std::vector<int>> expected_data_combination(
+        expected_data.size() + 1);
+    expected_data_combination[0] = {8, 9};
+    expected_data_combination[1] = {8, 9};
+    expected_data_combination[2] = {6};
+    expected_data_combination[3] = {11};
+    expected_data_combination[4] = {7, 10};
+    expected_data_combination[5] = {7, 10};
+    expected_data_combination[6] = {2};
+    expected_data_combination[7] = {0, 26};
+    expected_data_combination[8] = {0, 26};
+    expected_data_combination[9] = {24};
+    expected_data_combination[10] = {1, 25};
+    expected_data_combination[11] = {1, 25};
+    expected_data_combination[12] = {20};
+    expected_data_combination[13] = {35, 18};
+    expected_data_combination[14] = {35, 18};
+    expected_data_combination[15] = {33};
+    expected_data_combination[16] = {34, 19};
+    expected_data_combination[17] = {34, 19};
+    expected_data_combination[18] = {15};
+    expected_data_combination[19] = {29};
+    expected_data_combination[20] = {17, 27};
+    expected_data_combination[21] = {17, 27};
+    expected_data_combination[22] = {16, 28};
+    expected_data_combination[23] = {16, 28};
+    expected_data_combination[24] = {5, 12};
+    expected_data_combination[25] = {5, 12};
+    expected_data_combination[26] = {23, 3};
+    expected_data_combination[27] = {23, 3};
+    expected_data_combination[28] = {21, 32};
+    expected_data_combination[29] = {21, 32};
+    expected_data_combination[30] = {30, 14};
+    expected_data_combination[31] = {30, 14};
+    expected_data_combination[32] = {4, 22, 31, 13};
+    expected_data_combination[33] = {4, 22, 31, 13};
+    expected_data_combination[34] = {4, 22, 31, 13};
+    expected_data_combination[35] = {4, 22, 31, 13};
+    expected_data_combination[36] = {4, 22, 31, 13};
 
     printf("\nSorted OOR and OOC matrices:\n");
     printf("(row, col): data\n");
@@ -69,7 +113,8 @@ TEST_CASE("Test StiffnessMatrix Construction") {
              elem_stiffness_data_host(i));
       REQUIRE(rowColIndex_host(i).r == expected_oor[i]);
       REQUIRE(rowColIndex_host(i).c == expected_ooc[i]);
-      REQUIRE(elem_stiffness_data_host(i) == expected_data[i]);
+      REQUIRE(matches_any(expected_data_combination[i],
+                          int(elem_stiffness_data_host(i))));
     }
 
     printf("\n");

@@ -64,8 +64,9 @@ void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
   assert(rowColCOO_.size() == data.size());
   auto rowColCoo_l = rowColCOO_;
 
+  /*
   struct gIDComparator {
-    KOKKOS_INLINE_FUNCTION constexpr bool operator()(
+    KOKKOS_FUNCTION constexpr bool operator()(
         const globalIndex &a, const globalIndex &b) const {
       if (a.r == b.r) {
         return a.c < b.c;
@@ -73,6 +74,7 @@ void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
       return a.r < b.r;
     };
   };
+   */
 
   Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
                                     rowColCoo_l, data, gIDComparator());
@@ -127,12 +129,12 @@ void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
 
   // * Fill CSR row index
   // TODO: Multilevel parallelism
+  auto nDof_l = nDof_;
   Kokkos::parallel_for(
       "fill CSR", nDof_, KOKKOS_LAMBDA(const size_t row) {
         size_t row_start = unique_row_start_index(row);
         size_t row_end =
-            (row == nDof_ - 1) ? coo_size : unique_row_start_index(row + 1);
-        printf("Row %zu: %zu %zu\n", row, row_start, row_end);
+            (row == nDof_l - 1) ? coo_size : unique_row_start_index(row + 1);
         assert(row_end > row_start);
 
         int col_i = -1;
