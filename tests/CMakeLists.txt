@@ -32,3 +32,10 @@ add_executable(test_assembly test_assembly.cpp ${CMAKE_SOURCE_DIR}/src/Mesh.cpp 
 target_link_libraries(test_assembly PRIVATE Catch2::Catch2WithMain Kokkos::kokkos)
 target_include_directories(test_assembly PRIVATE ${CMAKE_SOURCE_DIR}/src)
 catch_discover_tests(test_assembly WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+# Test Matrix Vector Multiplication
+add_executable(test_matvecmult test_matvec_mult.cpp ${CMAKE_SOURCE_DIR}/src/MatVecMult.cpp)
+target_link_libraries(test_matvecmult PRIVATE Catch2::Catch2WithMain Kokkos::kokkos)
+target_include_directories(test_matvecmult PRIVATE ${CMAKE_SOURCE_DIR}/src)
+catch_discover_tests(test_matvecmult WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

@@ -4,11 +4,13 @@ set(Assignment2_SOURCES
     main.cpp
     Mesh.cpp
     StiffnessMatrix.cpp
+    MatVecMult.cpp
 )
 
 set (Assignment2_HEADERS
     Mesh.h
     StriffnessMatrix.h
+    MatVecMult.h
 )
 
 
