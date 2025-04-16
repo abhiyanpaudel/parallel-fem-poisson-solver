@@ -4,6 +4,8 @@ set(Assignment2_SOURCES
     main.cpp
     Mesh.cpp
 	CalculateStiffnessMatrixAndLoadVector.cpp	
+    StiffnessMatrix.cpp
+    MatVecMult.cpp
 )
 
 set (Assignment2_HEADERS
@@ -12,6 +14,8 @@ set (Assignment2_HEADERS
 	TriElement.hpp
 	QuadElement.hpp
 	CalculateStiffnessMatrixAndLoadVector.hpp	
+    StriffnessMatrix.h
+    MatVecMult.h
 )
 
 

@@ -1,5 +1,6 @@
 # clion build dir
 cmake-build-*
+build-*
 # Compiled Object files
 **/.DS_Store
 *.slo

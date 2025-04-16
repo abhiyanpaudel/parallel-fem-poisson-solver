@@ -1,0 +1,35 @@
+name: RunTests 
+
+on: push
+
+jobs:
+  TestMesh:
+    name: TestMesh
+    runs-on: ubuntu-22.04
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:        
+
+    - name: UpdatePackages
+      run: sudo apt-get update
+
+    - name: CheckoutRepository
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: bash ${GITHUB_WORKSPACE}/ActionsInstall.sh
+
+    - name: TestCode
+      run: |
+        cd build/ 
+        export OMP_NUM_THREADS=2
+        export OMP_PLACES=threads
+        export OMP_PROC_BIND=spread
+        make test
+    
+    - name: Results
+      run: cd build/Testing/Temporary && cat LastTest.log
+      
