@@ -62,6 +62,11 @@ class StiffnessMatrix {
 
   void assemble(Kokkos::View<double *> data);
 
+  [[nodiscard]]
+  size_t getElementStiffnessSize() const {
+    return mesh_.GetNumElements() * mesh_.GetMeshType() * mesh_.GetMeshType();
+  };
+
   void printStiffnessMatrix() const;
 
  private:

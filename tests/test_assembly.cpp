@@ -30,6 +30,7 @@ TEST_CASE("Test StiffnessMatrix Construction") {
         KOKKOS_LAMBDA(const int i) { elem_stiffness_data(i) = i; });
 
     StiffnessMatrix stiffnessMatrix(mesh);
+    REQUIRE(expected_size == stiffnessMatrix.getElementStiffnessSize());
 
     auto rowColIndex_host = Kokkos::create_mirror_view(
         stiffnessMatrix.elementStiffnessMatrix.rowColCOO_);

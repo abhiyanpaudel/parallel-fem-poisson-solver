@@ -15,25 +15,6 @@ StiffnessMatrix::StiffnessMatrix(Mesh mesh) : mesh_(mesh) {
   elementStiffnessMatrix.createOOROOC(mesh_);
 }
 
-void StiffnessMatrix::createRowIndex() {
-  auto mesh_data = mesh_.GetData();
-  int n_local_verts = mesh_.GetMeshType() + 1;
-  // auto rowIndex_scatter =
-  // Kokkos::Experimental::create_scatter_view(csrRowIds_);
-  auto rowIndex_l = csrRowIds_;
-
-  /* ! Wrong
-  // TODO: MDRange/ Hierarchical
-  Kokkos::parallel_for("fillrowsizes", nElem_, KOKKOS_LAMBDA (const int elem_id)
-  { for (int i = 0; i < n_local_verts; ++i) {
-          //auto access = rowIndex_scatter.access();
-          int node_id = mesh_data(elem_id, i, 0); //TODO: Create issue to remove
-  double indexing Kokkos::atomic_add(&rowIndex_l(node_id), n_local_verts);
-      }
-  });
-  */
-}
-
 void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
   auto mesh_data = mesh.GetData();
   auto n_elems = mesh.GetNumElements();
@@ -63,18 +44,6 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
 void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
   assert(rowColCOO_.size() == data.size());
   auto rowColCoo_l = rowColCOO_;
-
-  /*
-  struct gIDComparator {
-    KOKKOS_FUNCTION constexpr bool operator()(
-        const globalIndex &a, const globalIndex &b) const {
-      if (a.r == b.r) {
-        return a.c < b.c;
-      }
-      return a.r < b.r;
-    };
-  };
-   */
 
   Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
                                     rowColCoo_l, data, gIDComparator());
