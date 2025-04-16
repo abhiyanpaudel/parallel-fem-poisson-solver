@@ -13,8 +13,11 @@ protected:
 	double k_;
 
 public:
+	KOKKOS_INLINE_FUNCTION
     Element(const Mesh& mesh, int elemIdx, double k = 1.0) : mesh_(mesh), elemIdx_(elemIdx), k_(k) {}
-    virtual ~Element() {}
+   
+	KOKKOS_INLINE_FUNCTION
+	virtual ~Element() {}
 
     // Get number of nodes per element
     KOKKOS_INLINE_FUNCTION

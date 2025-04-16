@@ -25,6 +25,7 @@ private:
     }
 
 public:
+	KOKKOS_INLINE_FUNCTION
     QuadElement(const Mesh& mesh, int elemIdx) : Element(mesh, elemIdx) {}
     
     KOKKOS_INLINE_FUNCTION
