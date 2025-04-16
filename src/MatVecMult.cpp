@@ -7,6 +7,7 @@
 using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
 using member_type = typename TeamPolicy::member_type;
 
+// Gets the maximum value in a Kokkos::View<int *>
 [[nodiscard]]
 int get_max(Kokkos::View<int *> arr) {
   int max = 0;

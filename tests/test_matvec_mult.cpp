@@ -63,8 +63,8 @@ TEST_CASE("Test matrix-vector multiplication") {
 
     // CSRMatrix
     auto A = CSRMatrix(row_ptr, col_ind, val);
-    REQUIRE(A.nRows == N);
-    REQUIRE(A.nCols == M);
+    REQUIRE(A.get_nCols() == M);
+    REQUIRE(A.get_nRows() == N);
 
     // x
     // [1 2 3 -1]

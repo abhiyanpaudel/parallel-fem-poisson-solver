@@ -11,7 +11,6 @@ StiffnessMatrix::StiffnessMatrix(Mesh mesh) : mesh_(mesh) {
   nDof_ = mesh_.GetNumVertices();
   nElem_ = mesh_.GetNumElements();
   Kokkos::resize(csrRowIds_, nDof_ + 1);
-  // createRowIndex();
   elementStiffnessMatrix.createOOROOC(mesh_);
 }
 
