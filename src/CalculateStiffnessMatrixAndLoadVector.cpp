@@ -8,6 +8,7 @@ Results calculateAllElementStiffnessMatrixAndLoadVector(const Mesh& mesh, double
 	int numNodes = mesh.GetNumNodesPerElement();
 
     int sizePerElement = numNodes * numNodes; 
+
 	View1D allElementStiffnessMatrix("stores all element stiffness matrix", numElements * sizePerElement);
 	View1D allElementLoadVector("stores all element load vector", numElements * numNodes);
     
@@ -39,7 +40,7 @@ Results calculateAllElementStiffnessMatrixAndLoadVector(const Mesh& mesh, double
 			allElementLoadVector(base_load_idx + i) = loadVectorPerElement[i];	
 		}
 
-        });
+    });
 
-	Results{allElementStiffnessMatrix, allElementLoadVector};
+	return Results{allElementStiffnessMatrix, allElementLoadVector};
 }
