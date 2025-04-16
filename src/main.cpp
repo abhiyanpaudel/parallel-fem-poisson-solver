@@ -42,8 +42,6 @@ int main(int argc, char** argv) {
 
     stiffnessMatrix.sortDataByRowCol(element_stiffness);
     stiffnessMatrix.assemble(element_stiffness);
-
-    stiffnessMatrix.printStiffnessMatrix();
   }
   Kokkos::finalize();
 
