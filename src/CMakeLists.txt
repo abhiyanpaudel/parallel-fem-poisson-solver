@@ -3,10 +3,15 @@
 set(Assignment2_SOURCES
     main.cpp
     Mesh.cpp
+	CalculateStiffnessMatrixAndLoadVector.cpp	
 )
 
 set (Assignment2_HEADERS
     Mesh.h
+	Element.hpp
+	TriElement.hpp
+	QuadElement.hpp
+	CalculateStiffnessMatrixAndLoadVector.hpp	
 )
 
 
