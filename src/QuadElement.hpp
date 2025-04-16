@@ -31,7 +31,7 @@ public:
     int getNumNodes() const override { return numNodes_; }
     
     KOKKOS_INLINE_FUNCTION
-    double computeBasisFunction(const int node, const double xi, const double eta) const override {
+    double computeLocalBasisFunction(const int node, const double xi, const double eta) const override {
         switch(node) {
             case 0: return 0.25 * (1.0 - xi) * (1.0 - eta);
             case 1: return 0.25 * (1.0 + xi) * (1.0 - eta);
@@ -173,7 +173,7 @@ public:
             double abs_det_J = det_J > 0 ? det_J : -det_J;
             
             for (int i = 0; i < numNodes_; i++) {
-                double phi = computeBasisFunction(i, xi, eta);
+                double phi = computeLocalBasisFunction(i, xi, eta);
                 load[i] += phi * f * weight * abs_det_J;
             }
         }

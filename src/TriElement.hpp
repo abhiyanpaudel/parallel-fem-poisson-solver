@@ -164,7 +164,7 @@ public:
             double abs_det_J = det_J > 0 ? det_J : -det_J;
             
             for (int i = 0; i < numNodes_; i++) {
-                double phi = computeBasisFunction(i, xi, eta);
+                double phi = computeLocalBasisFunction(i, xi, eta);
                 load[i] += phi * f * weight * abs_det_J;
             }
         }

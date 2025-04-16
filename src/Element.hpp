@@ -2,7 +2,7 @@
 #define COMPUTING_AT_SCALE_ASSIGNMENT_ELEMENT_HPP
 
 #include <Kokkos_Core.hpp>
-#include "Mesh.hpp"
+#include "Mesh.h"
 
 using View1D = Kokkos::View<double*>;
 
@@ -22,7 +22,7 @@ public:
     
 	// Compute local basis function
     KOKKOS_INLINE_FUNCTION
-    virtual double computeBasisFunction(const int node, const double xi, const double eta) const = 0;
+    virtual double computeLocalBasisFunction(const int node, const double xi, const double eta) const = 0;
 
     // Compute jacobian for an element
     KOKKOS_INLINE_FUNCTION

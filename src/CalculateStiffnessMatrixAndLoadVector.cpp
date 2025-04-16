@@ -14,18 +14,16 @@ Results calculateAllElementStiffnessMatrixAndLoadVector(const Mesh& mesh, double
 	Kokkos::parallel_for("CalculateStiffness", numElements,
         KOKKOS_LAMBDA(const int elemIdx) {
 
+		double stiffnessMatrixPerElement[MAX_STIFFNESS_MATRIX_SIZE] = {};
+		double loadVectorPerElement[MAX_LOAD_VECTOR_SIZE] = {};
 		if (numNodes == 3) { // Triangle element
                 TriElement triElem(mesh, elemIdx);
                 triElem.setMaterialProperty(k);
-				double stiffnessMatrixPerElement[MAX_STIFFNESS_MATRIX_SIZE] = {};
-				double loadVectorPerElement[MAX_LOAD_VECTOR_SIZE] = {};
                 triElem.computeElementStiffnessMatrix(stiffnessMatrixPerElement);
 				triElem.computeElementLoadVector(loadVectorPerElement);
         } else { // Quad element
                 QuadElement quadElem(mesh, elemIdx);
                 quadElem.setMaterialProperty(k);
-				double stiffnessMatrixPerElement[MAX_STIFFNESS_MATRIX_SIZE] = {};
-				double loadVectorPerElement[MAX_LOAD_VECTOR_SIZE] = {};
                 quadElem.computeElementStiffnessMatrix(stiffnessMatrixPerElement);
 				quadElem.computeElementLoadVector(loadVectorPerElement);
         }
