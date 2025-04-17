@@ -4,11 +4,13 @@
 
 #include <CalculateStiffnessMatrixAndLoadVector.hpp>
 #include <Kokkos_Core.hpp>
+#include <chrono>
 #include <iostream>
 
 #include "StiffnessMatrix.h"
 
 int main(int argc, char** argv) {
+  auto start = std::chrono::steady_clock::now();
 #ifdef KOKKOS_ENABLE_OPENMP
   printf("Using Kokkos OpenMP backend\n");
 #endif
@@ -52,14 +54,18 @@ int main(int argc, char** argv) {
     stiffnessMatrix.sortDataByRowCol(element_stiffness);
     stiffnessMatrix.assemble(element_stiffness);
 
-    stiffnessMatrix.printStiffnessMatrix();
-
 #ifndef NDEBUG
+    stiffnessMatrix.printStiffnessMatrix();
     printf("=>----------- Dense Matrix -----------<=\n");
     stiffnessMatrix.printDenseMatrix();
 #endif
   }
   Kokkos::finalize();
+
+  auto end = std::chrono::steady_clock::now();
+  auto elapsed_time =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  printf("Total execution time: %lld ms\n", elapsed_time.count());
 
   return 0;
 }

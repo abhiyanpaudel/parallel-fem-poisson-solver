@@ -41,14 +41,17 @@ void ElementStiffnessMatrix::createOOROOC(Mesh mesh) {
 }
 
 void ElementStiffnessMatrix::sortDataByRowCol(Kokkos::View<double *> data) {
+  Kokkos::Profiling::pushRegion("Sort Element Stiffness Matrix");
   assert(rowColCOO_.size() == data.size());
   auto rowColCoo_l = rowColCOO_;
 
   Kokkos::Experimental::sort_by_key(Kokkos::DefaultExecutionSpace(),
                                     rowColCoo_l, data, gIDComparator());
+  Kokkos::Profiling::popRegion();
 }
 
 void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
+  Kokkos::Profiling::pushRegion("Create CSR Row Index");
   auto rowColCOO_l = elementStiffnessMatrix.rowColCOO_;
   size_t coo_size = rowColCOO_l.size();
 
@@ -89,15 +92,20 @@ void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
       csrDataSize_);
   Kokkos::fence();
   printf("Total unique entries: %zu\n", csrDataSize_);
+  Kokkos::Profiling::popRegion();
 
+  Kokkos::Profiling::pushRegion("Allocate CSR");
   Kokkos::resize(csrColIds_, csrDataSize_);
   Kokkos::resize(csrValues_, csrDataSize_);
+  Kokkos::Profiling::popRegion();
+
   auto csrColIds_l = csrColIds_;
   auto csrValues_l = csrValues_;
 
   // * Fill CSR row index
   // TODO: Multilevel parallelism
   auto nDof_l = nDof_;
+  Kokkos::Profiling::pushRegion("Fill Stiffness CSR");
   Kokkos::parallel_for(
       "fill CSR", nDof_, KOKKOS_LAMBDA(const size_t row) {
         size_t row_start = unique_row_start_index(row);
@@ -113,6 +121,7 @@ void StiffnessMatrix::assemble(Kokkos::View<double *> data) {
           csrValues_l(csr_data_index) += data(coo_i);
         }
       });
+  Kokkos::Profiling::popRegion();
 }
 
 void StiffnessMatrix::printStiffnessMatrix() const {
