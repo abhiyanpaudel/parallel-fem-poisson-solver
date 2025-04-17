@@ -4,14 +4,14 @@
 
 #include "Mesh.h"
 
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
 void check_file_existence(const std::string filename) {
-  if (!std::filesystem::exists(filename)) {
+  std::ifstream file(filename);
+  if (!file) {
     throw std::runtime_error("File does not exist: " + filename);
   }
 }
@@ -32,13 +32,13 @@ Mesh::Mesh(const std::string filename) {
          known_mesh_type = false;
     int node_count = -1;
     while (std::getline(input_file, line)) {
-      if (line.substr(1,5) == std::string("Nodes")) {
+      if (line.substr(1, 5) == std::string("Nodes")) {
         getting_nodes = true;
-      } else if (line.substr(1,8) == std::string("EndNodes")) {
+      } else if (line.substr(1, 8) == std::string("EndNodes")) {
         getting_nodes = false;
-      } else if (line.substr(1,8) == std::string("Elements")) {
+      } else if (line.substr(1, 8) == std::string("Elements")) {
         getting_elements = true;
-      } else if (line.substr(1,11) == std::string("EndElements")) {
+      } else if (line.substr(1, 11) == std::string("EndElements")) {
         getting_elements = false;
       } else if (getting_nodes && node_count == -1) {
         x_coords.resize(std::stoi(line));
@@ -64,14 +64,17 @@ Mesh::Mesh(const std::string filename) {
         while (std::getline(ss, idx_as_string, ' ')) {
           if (k == 1) {
             int geom_type = std::stoi(idx_as_string);
-            if ((geom_type != 15) && (geom_type!=1) && (geom_type != 2) && (geom_type !=3)) {
-                std::string error_message = "Encountered invalid element type " + std::to_string(geom_type) + ". Make sure the mesh is 2D 1st order tet or quad.\n";
-                throw std::runtime_error(error_message);
+            if ((geom_type != 15) && (geom_type != 1) && (geom_type != 2) &&
+                (geom_type != 3)) {
+              std::string error_message =
+                  "Encountered invalid element type " +
+                  std::to_string(geom_type) +
+                  ". Make sure the mesh is 2D 1st order tet or quad.\n";
+              throw std::runtime_error(error_message);
             }
             if (geom_type != 2 && geom_type != 3) {
               break;  // If element is not a quad or triangle go to next line
             } else if (!known_mesh_type) {
-
               if (geom_type == 2) {
                 meshType_ = MeshType::TRIANGLE;
 
@@ -91,7 +94,8 @@ Mesh::Mesh(const std::string filename) {
       }
     }
     input_file.close();
-    numVertices_ = node_count; // Set numVertices_ based on read number of nodes
+    numVertices_ =
+        node_count;  // Set numVertices_ based on read number of nodes
   } else {
     throw std::runtime_error("Cannot open file: " + filename);
   }
