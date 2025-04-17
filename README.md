@@ -22,6 +22,9 @@ cmake --build build -j2 --target install
    module load cmake
 ```
 
+> [!TIP]
+> If you are running on CCI, please use `module load gcc spectrum-mpi cuda cmake` and `g++` compiler. It is not tested for other compilers. If you want to profile, install kokkos with `-DKokkos_ENABLE_LIBDL=ON` flag.
+
 2. Installing `Catch2` is optional. If you enable testing but don't provide `Catch2_ROOT`, it will fetch it automatically.
 3. To install the project, use `cmake` as usual. Use `Assignment_ENABLE_TESTING` (default ON) to enable testing. *An example configuration for SCOREC Machines is given in `scorec-config.sh` file.*
 4. To run tests, use `ctest` or `make test` after building the project. **Note that some tests may not work if the test binaries are run directly from the build directory. Use `tests/` directory in that case.**
