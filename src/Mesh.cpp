@@ -32,6 +32,7 @@ Mesh::Mesh(const std::string filename) {
          known_mesh_type = false;
     int node_count = -1;
     while (std::getline(input_file, line)) {
+      if (line.empty()) continue;  // Skip empty lines
       if (line.substr(1, 5) == std::string("Nodes")) {
         getting_nodes = true;
       } else if (line.substr(1, 8) == std::string("EndNodes")) {
