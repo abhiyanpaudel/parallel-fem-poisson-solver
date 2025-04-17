@@ -8,6 +8,7 @@ build-*
 *.o
 *.obj
 
+*.sh
 # Precompiled Headers
 *.gch
 *.pch

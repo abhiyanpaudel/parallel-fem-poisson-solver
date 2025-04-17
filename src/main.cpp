@@ -2,6 +2,7 @@
 // Created by Fuad Hasan on 4/7/25.
 //
 
+#include <CalculateStiffnessMatrixAndLoadVector.hpp>
 #include <Kokkos_Core.hpp>
 #include <iostream>
 
@@ -30,18 +31,33 @@ int main(int argc, char** argv) {
     printf("Creating stiffness matrix\n");
     StiffnessMatrix stiffnessMatrix(mesh);
     auto el_stiff_size = stiffnessMatrix.getElementStiffnessSize();
-    printf("Element stiffness size: %d\n", el_stiff_size);
+    printf("Element stiffness size: %zu\n", el_stiff_size);
 
-    Kokkos::View<double*> element_stiffness("element_stiffness", el_stiff_size);
-    auto element_stiffness_h = Kokkos::create_mirror_view(element_stiffness);
-    // fill with random values
-    for (int i = 0; i < el_stiff_size; i++) {
-      element_stiffness_h(i) = static_cast<double>(rand()) / RAND_MAX;
+    auto el_stiffness_and_load =
+        calculateAllElementStiffnessMatrixAndLoadVector(mesh, 1);
+    auto element_stiffness = el_stiffness_and_load.allElementStiffnessMatrix;
+    printf("The element stiffness matrix size: %ld\n",
+           element_stiffness.size());
+
+#ifndef NDEBUG
+    auto element_stiffness_host = Kokkos::create_mirror_view(element_stiffness);
+    Kokkos::deep_copy(element_stiffness_host, element_stiffness);
+    printf("Element stiffness matrices:\n");
+    for (int i = 0; i < element_stiffness_host.size(); i++) {
+      printf("%f, \n", element_stiffness_host(i));
     }
-    Kokkos::deep_copy(element_stiffness, element_stiffness_h);
+    printf("\n");
+#endif
 
     stiffnessMatrix.sortDataByRowCol(element_stiffness);
     stiffnessMatrix.assemble(element_stiffness);
+
+    stiffnessMatrix.printStiffnessMatrix();
+
+#ifndef NDEBUG
+    printf("=>----------- Dense Matrix -----------<=\n");
+    stiffnessMatrix.printDenseMatrix();
+#endif
   }
   Kokkos::finalize();
 

@@ -59,6 +59,10 @@ class Mesh {
   KOKKOS_INLINE_FUNCTION
   MeshType GetMeshType() const { return meshType_; }
 
+  [[nodiscard]] size_t GetNumNodesPerElement() const {
+	return static_cast<int>(GetMeshType()); 
+  }
+
  private:
   // ***************************** Private Attributes
   // ***************************** //
