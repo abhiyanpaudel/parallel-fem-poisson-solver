@@ -4,7 +4,6 @@
 
 #include <Kokkos_Core.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <iostream>
 
 #include "MatVecMult.h"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
@@ -85,7 +84,7 @@ TEST_CASE("Test matrix-vector multiplication") {
 
     // Expected result
     std::vector<double> expected_y = {5.0, 9.0, 18.0};
-    printf("y size = %d\n", y_h.size());
+    printf("y size = %zu\n", y_h.size());
     REQUIRE(y_h.size() == N);
     for (int i = 0; i < N; ++i) {
       printf("Expected y[%d] = %f, Actual y[%d] = %f\n", i, expected_y[i], i,

@@ -182,3 +182,24 @@ void StiffnessMatrix::printDenseMatrix() const {
     printf("\n");
   }
 }
+
+Kokkos::View<double *> assembleLoadVector(Kokkos::View<double *> elementLoad,
+                                          Mesh mesh) {
+  Kokkos::Profiling::pushRegion("Assemble Load Vector");
+
+  Kokkos::View<double *> loadVector("loadVector", mesh.GetNumVertices());
+  auto mesh_data = mesh.GetData();
+  int node_per_elem = mesh.GetMeshType();
+
+  Kokkos::parallel_for(
+      "Fill Load Vector", mesh.GetNumElements(),
+      KOKKOS_LAMBDA(const int elem_id) {
+        for (int node = 0; node < node_per_elem; ++node) {
+          int node_id = int(mesh_data(elem_id, node, 0));
+          Kokkos::atomic_add(&loadVector(node_id), elementLoad(elem_id));
+        }
+      });
+
+  Kokkos::Profiling::popRegion();
+  return loadVector;
+}

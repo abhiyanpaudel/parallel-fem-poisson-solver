@@ -46,3 +46,9 @@ add_executable(test_element_stiffness test_element_stiffness.cpp ${CMAKE_SOURCE_
 target_link_libraries(test_element_stiffness PRIVATE Catch2::Catch2WithMain Kokkos::kokkos)
 target_include_directories(test_element_stiffness PRIVATE ${CMAKE_SOURCE_DIR}/src)
 catch_discover_tests(test_element_stiffness WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Test Load Vector
+add_executable(test_load_vector test_load_vector_assembly.cpp ${CMAKE_SOURCE_DIR}/src/Mesh.cpp ${CMAKE_SOURCE_DIR}/src/StiffnessMatrix.cpp ${CMAKE_SOURCE_DIR}/src/CalculateStiffnessMatrixAndLoadVector.cpp)
+target_link_libraries(test_load_vector PRIVATE Catch2::Catch2WithMain Kokkos::kokkos)
+target_include_directories(test_load_vector PRIVATE ${CMAKE_SOURCE_DIR}/src)
+catch_discover_tests(test_load_vector WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

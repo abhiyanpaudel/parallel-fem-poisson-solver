@@ -9,6 +9,11 @@
 
 #include "Mesh.h"
 
+// This function assembles the element load vector into the global load vector
+[[nodiscard]]
+Kokkos::View<double *> assembleLoadVector(Kokkos::View<double *> elementLoad,
+                                          Mesh mesh);
+
 // Contains the global indices of the element stiffness matrix
 // This is paired so that we can sort
 // data using Kokkos bitonic sorting algorithm
