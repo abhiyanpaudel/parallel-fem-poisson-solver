@@ -54,10 +54,21 @@ int main(int argc, char** argv) {
     stiffnessMatrix.sortDataByRowCol(element_stiffness);
     stiffnessMatrix.assemble(element_stiffness);
 
+    auto load_vector =
+        assembleLoadVector(el_stiffness_and_load.allElementLoadVector, mesh);
+
 #ifndef NDEBUG
     stiffnessMatrix.printStiffnessMatrix();
     printf("=>----------- Dense Matrix -----------<=\n");
     stiffnessMatrix.printDenseMatrix();
+
+    printf("=>----------- Load Vector -----------<=\n");
+    auto load_vector_host = Kokkos::create_mirror_view(load_vector);
+    Kokkos::deep_copy(load_vector_host, load_vector);
+    printf("Load vector:\n");
+    for (int i = 0; i < load_vector_host.size(); i++) {
+      printf("%f, \n", load_vector_host(i));
+    }
 #endif
   }
   Kokkos::finalize();
