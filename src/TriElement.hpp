@@ -44,7 +44,8 @@ class TriElement : public Element {
         return xi;
       case 2:
         return eta;
-        // TODO: Handle with error flag
+      default:
+        return 100000.0;  // Error case
     }
   }
 
