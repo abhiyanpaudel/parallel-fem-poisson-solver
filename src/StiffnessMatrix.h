@@ -107,6 +107,10 @@ class StiffnessMatrix {
   // Prints the CSR arrays
   void printStiffnessMatrix() const;
 
+  [[nodiscard]] std::vector<std::vector<double>> getDenseMatrix() const;
+
+  void printDenseMatrix() const;
+
  private:
   // ********************** Private Functions **********************
   // void createRowIndex();

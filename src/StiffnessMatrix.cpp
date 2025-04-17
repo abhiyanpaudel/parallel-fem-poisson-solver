@@ -138,3 +138,38 @@ void StiffnessMatrix::printStiffnessMatrix() const {
   }
   printf("\n");
 }
+
+std::vector<std::vector<double>> StiffnessMatrix::getDenseMatrix() const {
+  std::vector<std::vector<double>> denseMatrix(nDof_,
+                                               std::vector<double>(nDof_, 0.0));
+
+  auto csr_row_host = Kokkos::create_mirror_view(csrRowIds_);
+  auto csr_col_host = Kokkos::create_mirror_view(csrColIds_);
+  auto csr_val_host = Kokkos::create_mirror_view(csrValues_);
+  Kokkos::deep_copy(csr_row_host, csrRowIds_);
+  Kokkos::deep_copy(csr_col_host, csrColIds_);
+  Kokkos::deep_copy(csr_val_host, csrValues_);
+
+  for (int row = 0; row < nDof_; ++row) {
+    auto row_start = csr_row_host(row);
+    auto row_end = csr_row_host(row + 1);
+    for (int i = row_start; i < row_end; ++i) {
+      int col = csr_col_host(i);
+      double value = csr_val_host(i);
+      denseMatrix[row][col] += value;
+    }
+  }
+
+  return denseMatrix;
+}
+
+void StiffnessMatrix::printDenseMatrix() const {
+  auto denseMatrix = getDenseMatrix();
+  printf("Dense Matrix:\n");
+  for (const auto &row : denseMatrix) {
+    for (const auto &val : row) {
+      printf("%5.1f ", val);
+    }
+    printf("\n");
+  }
+}
