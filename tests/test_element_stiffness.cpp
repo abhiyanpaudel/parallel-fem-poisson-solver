@@ -11,8 +11,6 @@
 void test_mesh(std::string filename,
                std::vector<double> expected_stiffness_matrix, int n_nodes);
 
-// void test_quad_mesh();
-
 TEST_CASE("Test Element Stiffness Matrix") {
   Kokkos::initialize();
   {
