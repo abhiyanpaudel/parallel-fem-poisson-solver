@@ -1,6 +1,8 @@
 # Assignment 2
 This is a part of the course "Advanced Computing for Engineering and Science Software at Scale".
 
+> [!IMPORTANT]
+> To view the speedup and other timing analysis, please check the `SpeedupAnalysis` directory. It contains two self describing IPython Notebooks (`plotCAS2.ipynb` and `total_time.ipynb`).
 
 ## Installation
 1. Install `Kokkos` with either `OpenMP` or `CUDA` backend. Here's an example cmake command:
