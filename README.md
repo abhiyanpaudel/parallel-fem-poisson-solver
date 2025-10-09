@@ -1,8 +1,63 @@
-# Assignment 2
-This is a part of the course "Advanced Computing for Engineering and Science Software at Scale".
+# Parallel FEM Matrix Assembly for the 2D Poisson Equation
+
+This repository implements a **parallel finite element (FEM)** framework for assembling the **stiffness matrix** and **load vector** for the 2D Poisson equation. 
+It was developed as part of the course
+**_Advanced Computing in Engineering and Science at Scale_** at RPI.
+
+The project demonstrates **performance-portable matrix assembly** on **triangular** and **quadrilateral** meshes using the [Kokkos](https://kokkos.org) programming model.  
+Parallel execution is supported across **CUDA (GPU)** and **OpenMP (CPU)** backends, with detailed performance benchmarking and timing analysis.
 
 > [!IMPORTANT]
-> To view the speedup and other timing analysis, please check the `SpeedupAnalysis` directory. It contains two self describing IPython Notebooks (`plotCAS2.ipynb` and `total_time.ipynb`).
+> Timing results, speedup plots, and convergence studies are available in the [`SpeedupAnalysis/`](./SpeedupAnalysis) directory.  
+> It contains two annotated Jupyter notebooks:  
+> • `plotCAS2.ipynb` 
+> • `total_time.ipynb`
+
+---
+
+## Problem Description
+
+This project targets the 2D **Poisson equation**:
+\[
+-\nabla^2 u = f \quad \text{in } \Omega, \qquad u = g \text{ on } \partial\Omega
+\]
+
+The finite element formulation yields the global linear system:
+\[
+K u = F
+\]
+where  
+- \( K \) — the assembled **stiffness matrix**  
+- \( F \) — the assembled **load vector**
+
+This implementation **focuses on assembling** \( K \) and \( F \) in parallel. It does not solve the linear system.
+Both **triangular (P1)** and **quadrilateral (Q1)** elements are supported.
+
+---
+
+## Key Features
+
+- Parallel FEM **matrix and load vector assembly** for 2D Poisson problems  
+- Support for **triangular (P1)** and **quadrilateral (Q1)** meshes  
+- Performance portability through **Kokkos** (CUDA, OpenMP, Serial backends)  
+- Includes **scaling and performance analysis** for different mesh resolutions  
+- **Automated CI/CD pipeline** for continuous build and test verification  
+- **Unit tests** verifying:
+    - Correctness of element-wise stiffness and load vector calculation
+    - Verification of global assembly 
+    - Accuracy of matrix vector product
+
+---
+
+
+## Authors
+
+- **Abhiyan Paudel** – RPI  
+- **Zachary Knowlan** – RPI  
+- **Fuad Hasan** – RPI  
+
+
+---
 
 ## Installation
 1. Install `Kokkos` with either `OpenMP` or `CUDA` backend. Here's an example cmake command:
