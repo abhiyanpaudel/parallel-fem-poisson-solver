@@ -1,3 +1,5 @@
+// created by Abhiyan Paudel
+
 #include "CalculateStiffnessMatrixAndLoadVector.hpp"
 
 Results calculateAllElementStiffnessMatrixAndLoadVector(const Mesh& mesh,
