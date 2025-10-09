@@ -3,7 +3,7 @@
 This repository implements a **parallel finite element (FEM)** framework for assembling the **stiffness matrix** and **load vector** for the 2D Poisson equation. 
 It was developed as part of the course **_Advanced Computing in Engineering and Science at Scale_** at RPI.
 
-The project demonstrates **performance-portable matrix assembly** on **triangular** and **quadrilateral** meshes using the [Kokkos](https://kokkos.org) programming model. Parallel execution is supported across **CUDA (GPU)** and **OpenMP (CPU)** backends, with detailed performance benchmarking and timing analysis.
+The project demonstrates **performance-portable matrix assembly** on **triangular** and **quadrilateral** meshes using the [Kokkos](https://kokkos.org/kokkos-core-wiki/) programming model. Parallel execution is supported across **CUDA (GPU)** and **OpenMP (CPU)** backends, with detailed performance benchmarking and timing analysis.
 
 > [!IMPORTANT]
 > Timing results and speedup plots are available in the [`SpeedupAnalysis/`](./SpeedupAnalysis) directory.  
