@@ -16,17 +16,13 @@ The project demonstrates **performance-portable matrix assembly** on **triangula
 ## Problem Description
 
 This project targets the 2D **Poisson equation**:
-\[
--\nabla^2 u = f \quad \text{in } \Omega, \qquad u = g \text{ on } \partial\Omega
-\]
+$$\nabla^2 u = f \quad \text{in } \Omega, \qquad u = g \text{ on } \partial\Omega$$
 
 The finite element formulation yields the global linear system:
-\[
-K u = F
-\]
+$$K u = F$$
 where  
-- \( K \) — the assembled **stiffness matrix**  
-- \( F \) — the assembled **load vector**
+- $$K$$ — the assembled **stiffness matrix**  
+- $$F$$ — the assembled **load vector**
 
 This implementation **focuses on assembling** \( K \) and \( F \) in parallel. It does not solve the linear system.
 Both **triangular (P1)** and **quadrilateral (Q1)** elements are supported.
